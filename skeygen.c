@@ -11,28 +11,45 @@
 #include "flint/fmpz_mat.h"
 #include "libbgv.h"
 
-int main(int argc, char *args[]) /*tt, lev, d, {q, n, bign} */
+
+int main(int argc, char *args[]) /*setup.txt:tt,lev,d, {q, n, bign} */
 {
+        FILE *fp;
+        
+        if((fp = fopen(args[1], "r")) == NULL)
+        {
+                printf("file read error\n");
+                exit(0);
+        }
+        
+        char str[100];
+        
         fmpz_t t, tmp;
         fmpz_init(t);
         fmpz_init(tmp);
-        fmpz_set_str(t, args[1], 10);
-        fmpz_set_str(tmp, args[2], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(t, str, 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         
         long lev, d, i, j, row;
         lev = fmpz_get_si(tmp);
-        
-        fmpz_set_str(tmp, args[3], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         d = fmpz_get_si(tmp);
+        
         
         for( i = 0 ; i <= lev; i++ ) {
                 param_node_t *h;
                 fmpz_poly_mat_t sk;
                 h = param_node_init(h);
-                fmpz_set_str(h->q, args[4 + i * 3], 10);
-                fmpz_set_str(tmp, args[5 + i * 3], 10);
+                fgets(str, 100, fp);
+                fmpz_set_str(h->q, str, 10);
+                fgets(str, 100, fp);
+                fmpz_set_str(tmp, str, 10);
                 h->n = fmpz_get_si(tmp);
-                fmpz_set_str(tmp, args[6 + i * 3], 10);
+                fgets(str, 100, fp);
+                fmpz_set_str(tmp, str, 10);
                 h->bign = fmpz_get_si(tmp);
                 row = 1 + h->n;
                 fmpz_poly_mat_init(sk, row, 1);
@@ -45,6 +62,7 @@ int main(int argc, char *args[]) /*tt, lev, d, {q, n, bign} */
                 }
                 fmpz_poly_mat_clear(sk);
         }
+        fclose(fp);
         fmpz_clear(t);
         fmpz_clear(tmp);
         return 0;

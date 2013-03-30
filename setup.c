@@ -28,7 +28,7 @@ int main(int argc, char *args[])  /*bb, lam, lev, tt*/
         param = param_node_init(param);
         long high;
         high = (lev + 1) * miu;
-        hcrypt_random(param->q, high);
+        gen_q(param->q, high);
         fmpz_t tmp;
         fmpz_init(tmp);
         fmpz_fdiv_q_si(tmp, param->q, bgv_get_bigb());
@@ -56,13 +56,13 @@ int main(int argc, char *args[])  /*bb, lam, lev, tt*/
         }
         r->next = NULL;
         fmpz_print(ctx->t);
-        printf(" ");
+        printf("\n");
         fmpz_print(ctx->level);
-        printf(" %ld ", d);
+        printf("\n%ld\n", d);
         r = param;
         while(r!=NULL) {
                 fmpz_print(r->q);
-                printf(" %ld %ld ", r->n, r->bign);
+                printf("\n%ld\n%ld\n", r->n, r->bign);
                 r = r->next;
         }
         

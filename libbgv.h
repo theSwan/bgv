@@ -47,14 +47,15 @@ typedef struct ciphertext_t {
 } ciphertext_t;
 
 static const double pi = 3.1415926;
-static const double dvn = 1.0;
-static const long bigb = 20;
+static const double dvn = 8.0;
+static const long bigb = 160;
 static long chrnd = 0;
 
 double bgv_get_dvn();
 long bgv_get_bigb();
 bgv_context_t *bgv_init(bgv_context_t *ctx, char *bb, char *lam, char *lev, char *tt, int base);
-void hcrypt_random(fmpz_t r, long len);
+void hcrypt_random(fmpz_t r);
+void gen_q(fmpz_t q, long len);
 fmpz *samplez(fmpz *vec, long d);
 void guassian_poly(fmpz *c, fmpz_poly_t poly, long d);
 void unif_poly(fmpz_poly_t poly, fmpz_t space, long d);

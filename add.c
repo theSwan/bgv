@@ -11,29 +11,190 @@
 #include "flint/fmpz_mat.h"
 #include "libbgv.h"
 
-ciphertext_t *hcrypt_bgv_add(ciphertext_t *c, pk_node_t *pbk, ciphertext_t *c1, ciphertext_t *c2)
+char str[100000];
+
+int main(int argc, char *args[])/* params, ct1.txt, ct2.txt, pk.txt */
 {
-	c = (ciphertext_t *)malloc(sizeof(ciphertext_t));
-	pk_node_t *pktmp;
-	pktmp = keylist->pubkey;
-        param_node_t *hp;
-        hp = param;
-        int l1 = c1->lv, l2 = c2->lv, l, high, low;
+	FILE *fp;
+        
+        if((fp = fopen(args[1], "r")) == NULL)
+        {
+                printf("file read error\n");
+                exit(0);
+        }
+        
+        fmpz_t t, tmp;
+        fmpz_init(t);
+        fmpz_init(tmp);
+        fgets(str, 100, fp);
+        fmpz_set_str(t, str, 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
+        
+        long lev, d, i, j;
+        lev = fmpz_get_si(tmp);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
+        d = fmpz_get_si(tmp);
+        
+        fmpz_poly_t fx;
+        fmpz_poly_init(fx);
+        fmpz_poly_set_coeff_si(fx, 0, 1);
+        fmpz_poly_set_coeff_si(fx, d, 1);
+        
+        param_node_t *hp, *pr, *ps;
+        hp = param_node_init(hp);
+        
+        ps = hp;
+        for( i = 0 ; i <= lev; i++ ) {
+                pr = param_node_init(pr);
+                fgets(str, 100, fp);
+                fmpz_set_str(pr->q, str, 10);
+                fgets(str, 100, fp);
+                fmpz_set_str(tmp, str, 10);
+                pr->n = fmpz_get_si(tmp);
+                fgets(str, 100, fp);
+                fmpz_set_str(tmp, str, 10);
+                pr->bign = fmpz_get_si(tmp);
+                ps->next = pr;
+                ps = pr;
+        }
+        ps->next = NULL;
+        
+        fclose(fp);
+        
+        hp = hp->next;
+        
+        long row, col, ctlev1, ctlev2, ctlev;
+        
+        if((fp = fopen(args[2], "r")) == NULL)
+        {
+                printf("file read error\n");
+                exit(0);
+        }
+        
+        fgets(str, 30, fp);
+        fmpz_set_str(tmp, str,10);
+        ctlev1 = fmpz_get_si(tmp);
+        
+        fgets(str, 30, fp);
+        fmpz_set_str(tmp, str,10);
+        row = fmpz_get_si(tmp);
+        
+        fgets(str, 30, fp);
+        fmpz_set_str(tmp, str,10);
+        col = fmpz_get_si(tmp);
+        
+        fmpz_poly_mat_t ct1;
+        fmpz_poly_mat_init(ct1, row, col);
+        for( i = 0 ; i < row ; i++) {
+                for(j = 0; j < col ; j++) {
+                        fgets(str, 100000, fp);
+                        fmpz_poly_set_str(fmpz_poly_mat_entry(ct1, i, j), str);
+                }
+        }
+        
+        fclose(fp);
+        
+        
+        if((fp = fopen(args[3], "r")) == NULL)
+        {
+                printf("file read error\n");
+                exit(0);
+        }
+        
+        fgets(str, 30, fp);
+        fmpz_set_str(tmp, str,10);
+        ctlev2 = fmpz_get_si(tmp);
+        
+        fgets(str, 30, fp);
+        fmpz_set_str(tmp, str,10);
+        row = fmpz_get_si(tmp);
+        
+        fgets(str, 30, fp);
+        fmpz_set_str(tmp, str,10);
+        col = fmpz_get_si(tmp);
+        
+        fmpz_poly_mat_t ct2;
+        fmpz_poly_mat_init(ct2, row, col);
+        for( i = 0 ; i < row ; i++) {
+                for(j = 0; j < col ; j++) {
+                        fgets(str, 100000, fp);
+                        fmpz_poly_set_str(fmpz_poly_mat_entry(ct2, i, j), str);
+                }
+        }
+        
+        fclose(fp);
+        
+        
+        if((fp = fopen(args[4], "r")) == NULL)
+        {
+                printf("file read error\n");
+                exit(0);
+        }
+        
+        pk_node_t *pktmp, *pks, *pkr;
+        long ii, jj;
+        pktmp = (pk_node_t *)malloc(sizeof(pk_node_t));
+        
+        pks = pktmp;
+        for(i=0;i<=lev;i++) {
+                pkr = (pk_node_t *)malloc(sizeof(pk_node_t));
+                fgets(str, 30, fp);
+                fmpz_set_str(tmp, str,10);
+                row = fmpz_get_si(tmp);
+                
+                fgets(str, 30, fp);
+                fmpz_set_str(tmp, str,10);
+                col = fmpz_get_si(tmp);
+                
+                fmpz_poly_mat_init(pkr->pka, row, col);
+                for( ii = 0 ; ii < row ; ii++) {
+                        for(jj = 0; jj < col ; jj++) {
+                                fgets(str, 100000, fp);
+                                fmpz_poly_set_str(fmpz_poly_mat_entry(pkr->pka, ii, jj), str);
+                        }
+                }
+                
+                fgets(str, 30, fp);
+                fmpz_set_str(tmp, str,10);
+                row = fmpz_get_si(tmp);
+                
+                fgets(str, 30, fp);
+                fmpz_set_str(tmp, str,10);
+                col = fmpz_get_si(tmp);
+                
+                fmpz_poly_mat_init(pkr->pkb, row, col);
+                for( ii = 0 ; ii < row ; ii++) {
+                        for(jj = 0; jj < col ; jj++) {
+                                fgets(str, 100000, fp);
+                                fmpz_poly_set_str(fmpz_poly_mat_entry(pkr->pkb, ii, jj), str);
+                        }
+                }
+                
+                pks->next = pkr;
+                pks = pkr;
+        }
+        pks->next = NULL;
+        
+        pktmp = pktmp->next;
+        
+        long high, low, l = lev;
+        
         fmpz_poly_mat_t levhigh, levlow;
-        if( l1 >= l2 ) {
-                fmpz_poly_mat_init_set(levhigh, c1->text);
-                fmpz_poly_mat_init_set(levlow, c2->text);
-                high = l1;
-                low = l2;
+        if( ctlev1 >= ctlev2 ) {
+                fmpz_poly_mat_init_set(levhigh, ct1);
+                fmpz_poly_mat_init_set(levlow, ct2);
+                high = ctlev1;
+                low = ctlev2;
         }
         else {
-                fmpz_poly_mat_init_set(levhigh, c2->text);
-                fmpz_poly_mat_init_set(levlow, c1->text);
-                high = l2;
-                low = l1;
+                fmpz_poly_mat_init_set(levhigh, ct2);
+                fmpz_poly_mat_init_set(levlow, ct1);
+                high = ctlev2;
+                low = ctlev1;
         }
-        l = bgv_get_level();
-        c->lv = low - 1;
+        ctlev = low - 1;
         while( l > high ) {
                 pktmp = pktmp->next;
                 hp = hp->next;
@@ -43,8 +204,6 @@ ciphertext_t *hcrypt_bgv_add(ciphertext_t *c, pk_node_t *pbk, ciphertext_t *c1, 
         l--;
         
         fmpz_poly_mat_t ctmp, tmpp;
-        sk_node_t *r;
-        r = keylist->prvkey;
         while( l >= low ) {
                 fmpz_poly_mat_init(ctmp, 1 + hp->next->n, 1);
                 long ltmp = fmpz_poly_mat_nrows(levhigh), k;
@@ -53,7 +212,7 @@ ciphertext_t *hcrypt_bgv_add(ciphertext_t *c, pk_node_t *pbk, ciphertext_t *c1, 
                 for( k = 0 ; k < ltmp ; k++) {
                         fmpz_poly_set(fmpz_poly_mat_entry(tmpp, k ,0), fmpz_poly_mat_entry(levhigh, k, 0));
                 }
-                hcrypt_bgv_refresh(ctmp, tmpp, pktmp->pkb, hp->q, hp->next->q, t);
+                hcrypt_bgv_refresh(ctmp, tmpp, pktmp->pkb, hp->q, hp->next->q, t, fx, d);
                 fmpz_poly_mat_swap(ctmp, levhigh);
                 fmpz_poly_mat_clear(ctmp);
                 fmpz_poly_mat_clear(tmpp);
@@ -63,8 +222,8 @@ ciphertext_t *hcrypt_bgv_add(ciphertext_t *c, pk_node_t *pbk, ciphertext_t *c1, 
                 l--;
         }
         
-        fmpz_poly_mat_t c3, c4;
-        long row1 = fmpz_poly_mat_nrows(levhigh), row2 = fmpz_poly_mat_nrows(levlow), row;
+        fmpz_poly_mat_t c3, c4, ct;
+        long row1 = fmpz_poly_mat_nrows(levhigh), row2 = fmpz_poly_mat_nrows(levlow);
         if(row1 > row2)
                 row = row1;
         else
@@ -73,15 +232,23 @@ ciphertext_t *hcrypt_bgv_add(ciphertext_t *c, pk_node_t *pbk, ciphertext_t *c1, 
         fmpz_poly_mat_init(c3, row*row, 1);
         fmpz_poly_mat_zero(c3);
         fmpz_poly_mat_add(c4, levhigh, levlow);
-        long i;
+        
         for(i = 0; i < row; i++ ) {
                 fmpz_poly_scalar_smod_fmpz(fmpz_poly_mat_entry(c4,i,0), fmpz_poly_mat_entry(c4,i,0), hp->q);
                 fmpz_poly_set(fmpz_poly_mat_entry(c3, i, 0), fmpz_poly_mat_entry(c4, i, 0));
         }
-        fmpz_poly_mat_init(c->text, 1 + hp->next->n, 1);
-        hcrypt_bgv_refresh(c->text, c3, pktmp->pkb, hp->q, hp->next->q, t);
+        row = 1 + hp->next->n;
+        fmpz_poly_mat_init(ct, row, 1);
+        hcrypt_bgv_refresh(ct, c3, pktmp->pkb, hp->q, hp->next->q, t, fx, d);
+        printf("%ld\n%ld\n1\n", ctlev, row);
+        
+        char *output;
+        for( i = 0; i < row; i++) {
+                output = fmpz_poly_get_str(fmpz_poly_mat_entry(ct, i, 0));
+                printf("%s\n", output);
+        }
         fmpz_poly_mat_clear(levhigh);
         fmpz_poly_mat_clear(levlow);
-	return c;
         
+        return 0;
 }

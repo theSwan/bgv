@@ -15,43 +15,58 @@ char str[100000];
 
 void print(pk_node_t *node);
 
-int main(int argc, char *args[])/*tt, lev, d,  {q,n, bign},filename{row, col, poly}*/
+int main(int argc, char *args[])/*setup.txt,sk.txt{row, col, poly}*/
 {
-	fmpz_t t, tmp;
+	FILE *fp;
+        
+        if((fp = fopen(args[1], "r")) == NULL)
+        {
+                printf("file read error\n");
+                exit(0);
+        }
+                
+        fmpz_t t, tmp;
         fmpz_init(t);
         fmpz_init(tmp);
-        fmpz_set_str(t, args[1], 10);
-        fmpz_set_str(tmp, args[2], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(t, str, 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         
         long lev, d, i, j;
         lev = fmpz_get_si(tmp);
-        
-        fmpz_set_str(tmp, args[3], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         d = fmpz_get_si(tmp);
+        
         fmpz_poly_t fx;
         fmpz_poly_init(fx);
         fmpz_poly_set_coeff_si(fx, 0, 1);
         fmpz_poly_set_coeff_si(fx, d, 1);
+        
         param_node_t *ph, *pr, *ps, *param, *pam;
         ph = param_node_init(ph);
 
         ps = ph;
         for( i = 0 ; i <= lev; i++ ) {
                 pr = param_node_init(pr);
-                fmpz_set_str(pr->q, args[4 + i * 3], 10);
-                fmpz_set_str(tmp, args[5 + i * 3], 10);
+                fgets(str, 100, fp);
+                fmpz_set_str(pr->q, str, 10);
+                fgets(str, 100, fp);
+                fmpz_set_str(tmp, str, 10);
                 pr->n = fmpz_get_si(tmp);
-                fmpz_set_str(tmp, args[6 + i * 3], 10);
+                fgets(str, 100, fp);
+                fmpz_set_str(tmp, str, 10);
                 pr->bign = fmpz_get_si(tmp);
                 ps->next = pr;
                 ps = pr;
         }
         ps->next = NULL;
         
-        long ind = 4 + 3 * (lev + 1), row, col;
-        FILE *fp;
+        fclose(fp);
+        long row, col;
 
-        if((fp = fopen(args[ind], "r")) == NULL)
+        if((fp = fopen(args[2], "r")) == NULL)
         {
                 printf("file read error\n");
                 exit(0);

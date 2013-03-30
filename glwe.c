@@ -14,7 +14,7 @@
 param_node_t *e_setup(long miu, long lamda, long b, fmpz_t t, param_node_t *param)
 {
         param = param_node_init(param);
-	hcrypt_random(param->q, miu);
+	gen_q(param->q, miu);
 	fmpz_t tmp;
 	fmpz_init(tmp);
 	fmpz_fdiv_q_si(tmp, param->q, bgv_get_bigb());

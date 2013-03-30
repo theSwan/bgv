@@ -13,19 +13,30 @@
 
 char str[100000];
 
-int main(int argc, char *args[])/* tt, lev, d, {q, n, bign}, ms, filename{row, col, pka, row, col, pkb} */
+int main(int argc, char *args[])/* setup.txt, ms, pk.txt{row, col, pka, row, col, pkb} */
 {
+        FILE *fp;
+        
+        if((fp = fopen(args[1], "r")) == NULL)
+        {
+                printf("file read error\n");
+                exit(0);
+        }
+        
         fmpz_t t, tmp;
         fmpz_init(t);
         fmpz_init(tmp);
-        fmpz_set_str(t, args[1], 10);
-        fmpz_set_str(tmp, args[2], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(t, str, 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         
         long lev, d, i, j;
         lev = fmpz_get_si(tmp);
-        
-        fmpz_set_str(tmp, args[3], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         d = fmpz_get_si(tmp);
+        
         fmpz_poly_t fx;
         fmpz_poly_init(fx);
         fmpz_poly_set_coeff_si(fx, 0, 1);
@@ -33,22 +44,23 @@ int main(int argc, char *args[])/* tt, lev, d, {q, n, bign}, ms, filename{row, c
         
         param_node_t *param;
         param = param_node_init(param);
-        fmpz_set_str(param->q, args[4], 10);
-        fmpz_set_str(tmp, args[5], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(param->q, str, 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         param->n = fmpz_get_si(tmp);
-        fmpz_set_str(tmp, args[6], 10);
+        fgets(str, 100, fp);
+        fmpz_set_str(tmp, str, 10);
         param->bign = fmpz_get_si(tmp);
         param->next = NULL;
+
+        fclose(fp);
         
-        long ind = 4 + 3 * (lev + 1);
         fmpz_poly_t ms;
         fmpz_poly_init(ms);
-        fmpz_poly_set_str(ms, args[ind]);
-        
-        ind++;
-        
-        FILE *fp;
-        if((fp = fopen(args[ind], "r")) == NULL)
+        fmpz_poly_set_str(ms, args[2]);
+                
+        if((fp = fopen(args[3], "r")) == NULL)
         {
                 printf("file read error\n");
                 exit(0);
